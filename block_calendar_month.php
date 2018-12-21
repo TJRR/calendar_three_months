@@ -58,28 +58,28 @@ class block_calendar_month extends block_base {
 
         $date = $calendartype->timestamp_to_date_array(time());
 
-        $prevmonth = calendar_sub_month($date['mon'], $date['year']);
-        $prevmonthtime = $calendartype->convert_to_gregorian($prevmonth[1], $prevmonth[0], 1);
-        $time_a = make_timestamp($prevmonthtime['year'], $prevmonthtime['month'], $prevmonthtime['day'],
-          $prevmonthtime['hour'], $prevmonthtime['minute']);
-
         $nextmonth = calendar_add_month($date['mon'], $date['year']);
         $nextmonthtime = $calendartype->convert_to_gregorian($nextmonth[1], $nextmonth[0], 1);
         $time_p = make_timestamp($nextmonthtime['year'], $nextmonthtime['month'], $nextmonthtime['day'],
           $nextmonthtime['hour'], $nextmonthtime['minute']);
 
-        $calendar_a = \calendar_information::create($time_a, $courseid, $categoryid);
+        $prevmonth = calendar_add_month($nextmonthtime['month'], $nextmonthtime['year']);
+        $prevmonthtime = $calendartype->convert_to_gregorian($prevmonth[1], $prevmonth[0], 1);
+        $time_a = make_timestamp($prevmonthtime['year'], $prevmonthtime['month'], $prevmonthtime['day'],
+          $prevmonthtime['hour'], $prevmonthtime['minute']);
+
         $calendar_p = \calendar_information::create($time_p, $courseid, $categoryid);
+        $calendar_a = \calendar_information::create($time_a, $courseid, $categoryid);
         //FInal da preparacao da data
 
-        list($data_a, $template_a) = calendar_get_view($calendar_a, 'minithree', false, isloggedin());
         list($data, $template) = calendar_get_view($calendar, 'minithree', false, isloggedin());
         list($data_p, $template_p) = calendar_get_view($calendar_p, 'minithree', false, isloggedin());
+        list($data_a, $template_a) = calendar_get_view($calendar_a, 'minithree', false, isloggedin());
 
         $renderer = $this->page->get_renderer('core_calendar');
-        $this->content->text .= $renderer->render_from_template($template_a, $data_a);
         $this->content->text .= $renderer->render_from_template($template, $data);
         $this->content->text .= $renderer->render_from_template($template_p, $data_p);
+        $this->content->text .= $renderer->render_from_template($template_a, $data_a);
 
         if ($this->page->course->id != SITEID) {
             $this->content->text .= $renderer->event_filter();
